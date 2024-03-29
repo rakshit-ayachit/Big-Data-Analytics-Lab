@@ -1,0 +1,111 @@
+BDA LAB 9 HIVE~Rakshit Ramachandra Ayachit-210968045
+
+1. Create database with the name Employee:
+CREATE DATABASE IF NOT EXISTS Employee;
+
+2. Display available databases:
+SHOW DATABASES;
+
+3. Choose the Employee database and Create external and internal table into it:
+USE Employee;
+
+-- External table creation
+CREATE EXTERNAL TABLE IF NOT EXISTS employee_external (
+    employee_id INT,
+    birthday DATE,
+    first_name STRING,
+    family_name STRING,
+    gender STRING,
+    work_day DATE
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+LOCATION '/home/staff/table';
+
+-- Internal table creation
+CREATE TABLE IF NOT EXISTS employee_internal (
+    employee_id INT,
+    birthday DATE,
+    first_name STRING,
+    family_name STRING,
+    gender STRING,
+    work_day DATE
+);
+
+4. Load the given data to both external and managed table:
+
+-- This is dummy_emp_data.txt
+employee_id,birthday,first_name,family_name,gender,work_day
+1,1990-05-15,John,Smith,Male,2024-03-27
+2,1985-08-20,Jane,Doe,Female,2024-03-27
+3,1992-11-10,Alice,Johnson,Female,2024-03-27
+4,1988-03-05,Bob,Jones,Male,2024-03-27
+5,1995-09-25,Emily,Williams,Female,2024-03-27
+
+-- Load data from local system to hdfs
+hadoop fs -put /path/to/dummy_emp_data.txt /user/hive/data/
+
+-- For the managed table
+LOAD DATA INPATH '/user/hive/data/dummy_emp_data.txt' INTO TABLE employee_internal;
+
+-- For the external table
+LOAD DATA INPATH '/user/hive/data/dummy_emp_data.txt' INTO TABLE employee_external;
+
+5. Perform partitioning by considering gender as a partition key:
+-- Drop and recreate internal table with partitioning
+DROP TABLE IF EXISTS employee_internal;
+CREATE TABLE IF NOT EXISTS employee_internal (
+    employee_id INT,
+    birthday DATE,
+    first_name STRING,
+    family_name STRING,
+    work_day DATE
+)
+PARTITIONED BY (gender STRING);
+
+-- Load data into partitioned internal table
+LOAD DATA LOCAL INPATH '/path/to/data' INTO TABLE employee_internal PARTITION (gender='Male');
+LOAD DATA LOCAL INPATH '/path/to/data' INTO TABLE employee_internal PARTITION (gender='Female');
+
+6. Create the buckets with suitable size:
+-- Drop and recreate internal table with buckets
+DROP TABLE IF EXISTS employee_internal;
+CREATE TABLE IF NOT EXISTS employee_internal (
+    employee_id INT,
+    birthday DATE,
+    first_name STRING,
+    family_name STRING,
+    work_day DATE
+)
+CLUSTERED BY (employee_id) INTO 4 BUCKETS;
+
+-- Load data into bucketed internal table
+LOAD DATA LOCAL INPATH '/path/to/data' INTO TABLE employee_internal;
+
+7. Find the oldest 10 employees from both male and female category:
+-- Query for male employees
+SELECT * 
+FROM (
+    SELECT * 
+    FROM employee_internal
+    WHERE gender = 'Male'
+    ORDER BY birthday ASC
+    LIMIT 10
+) AS male_oldest;
+
+-- Query for female employees
+SELECT * 
+FROM (
+    SELECT * 
+    FROM employee_internal
+    WHERE gender = 'Female'
+    ORDER BY birthday ASC
+    LIMIT 10
+) AS female_oldest;
+
+8. Find the oldest 10 employee by considering Employee table and compare the time taken to perform this operation between Question 7 and Question 8:
+-- Query for finding the oldest 10 employees directly from the Employee table
+SELECT * 
+FROM employee_internal
+ORDER BY birthday ASC
+LIMIT 10;

@@ -1,0 +1,74 @@
+Week 10: HBase
+
+Consider the bellow give table and perform the following tasks by writing HBase queries:
+
+Rowid; Personal data; Professonal data
+empid; name city age; designation salary
+1 Angela chicago 31 Architect 70000
+2 dwayne bostan 35 Web devloper 65000
+3 david seattle 29 Engineer 55000
+4 rahul USA 31 architect 70000
+5 jony chicago 29 Data analyst 80000
+6 sony bostan 29 Data analyst 80000
+
+1. Create hbase table as per the given data.
+create 'employee', 'personal_data', 'professional_data'
+
+put 'employee', '1', 'personal_data:name', 'Angela'
+put 'employee', '1', 'personal_data:city', 'chicago'
+put 'employee', '1', 'personal_data:age', '31'
+put 'employee', '1', 'professional_data:designation', 'Architect'
+put 'employee', '1', 'professional_data:salary', '70000'
+
+put 'employee', '2', 'personal_data:name', 'dwayne'
+put 'employee', '2', 'personal_data:city', 'bostan'
+put 'employee', '2', 'personal_data:age', '35'
+put 'employee', '2', 'professional_data:designation', 'Web devloper'
+put 'employee', '2', 'professional_data:salary', '65000'
+
+put 'employee', '3', 'personal_data:name', 'david'
+put 'employee', '3', 'personal_data:city', 'seattle'
+put 'employee', '3', 'personal_data:age', '29'
+put 'employee', '3', 'professional_data:designation', 'Engineer'
+put 'employee', '3', 'professional_data:salary', '55000'
+
+put 'employee', '4', 'personal_data:name', 'rahul'
+put 'employee', '4', 'personal_data:city', 'USA'
+put 'employee', '4', 'personal_data:age', '31'
+put 'employee', '4', 'professional_data:designation', 'architect'
+put 'employee', '4', 'professional_data:salary', '70000'
+
+put 'employee', '5', 'personal_data:name', 'jony'
+put 'employee', '5', 'personal_data:city', 'chicago'
+put 'employee', '5', 'personal_data:age', '29'
+put 'employee', '5', 'professional_data:designation', 'Data analyst'
+put 'employee', '5', 'professional_data:salary', '80000'
+
+put 'employee', '6', 'personal_data:name', 'sony'
+put 'employee', '6', 'personal_data:city', 'bostan'
+put 'employee', '6', 'personal_data:age', '29'
+put 'employee', '6', 'professional_data:designation', 'Data analyst'
+put 'employee', '6', 'professional_data:salary', '80000'
+
+2. Describe the table after inserting all rows of data into it.
+describe 'employee'
+
+3. Update the salary of an empid 3 from 55000 to 65000 and describe the table to show updates.
+put 'employee', '3', 'professional_data:salary', '65000'
+
+4. Retrieve employees details whose salary is greater than or equals to 70000.
+scan 'employee', {FILTER => "ValueFilter(>=, 'binary:70000')"}
+
+5. Read the personal data of an employee whose name is David. 
+get 'employee', '3', {COLUMN => 'personal_data:name'}
+
+6. Describe the employee details whose designation is data analyst.
+scan 'employee', {COLUMNS => 'professional_data:', FILTER => "SingleColumnValueFilter('professional_data', 'designation', =, 'binary:Data analyst')"}
+
+7. Count the number of rows and columns present in the created table.
+count 'employee'
+
+8. Delete the age column from personal data.
+alter 'employee', {NAME => 'personal_data', METHOD => 'delete', 'columns' => 'age'}
+
+
